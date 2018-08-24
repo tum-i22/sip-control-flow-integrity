@@ -55,6 +55,8 @@ public:
 
 	int addEdge(Vertex origin, Vertex destination);
 
+	void addRegisteredVertex(Vertex v);
+
 	vector<Vertex> getCallees(Vertex v);
 
 	vector<Vertex> getCallers(Vertex v);
@@ -69,6 +71,8 @@ public:
 
 	void writeGraphFile();
 
+	void writeStatsFile();
+
 	vector<Vertex> getPathsToSensitiveNodes();
 
     string str() {
@@ -80,4 +84,5 @@ public:
 private:
     vector<Vertex> vertices;
     vector<Edge> edges;
+    vector<Vertex> registeredVertices;
 };

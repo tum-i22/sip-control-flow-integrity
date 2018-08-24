@@ -31,6 +31,9 @@ static cl::opt<string> InputSensitiveFcts("i",
 	cl::desc("Specify filename containing the list of sensitive functions"),
 	cl::value_desc("filename"));
 
+static cl::opt<bool> OutputStats("s",
+        cl::desc("Output stats.json file"));
+
 
 void readInput(std::vector<std::string> *res) {
 	std::ifstream ifs;
@@ -65,6 +68,9 @@ namespace{
 	}
 
 	virtual bool doFinalization(Module &M){
+		if (OutputStats) {
+			graph.writeStatsFile();
+		}
 		graph.writeGraphFile();
 		return false;
 	}
@@ -90,6 +96,8 @@ namespace{
 					builder.CreateCall(registerFunction, strPtr);
 					modified = true;
 					first_instr = false;
+
+					graph.addRegisteredVertex(funcVertex);
 
 					// Function is in the sensitive list
 					if(find(sensitiveList.begin(), sensitiveList.end(), funcName) != sensitiveList.end()) {

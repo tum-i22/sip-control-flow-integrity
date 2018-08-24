@@ -65,6 +65,10 @@ int Graph::addEdge(Vertex origin, Vertex destination) {
 		edges.push_back(newEdge);
 }
 
+void Graph::addRegisteredVertex(Vertex v) {
+	registeredVertices.push_back(v);
+}
+
 vector<Vertex> Graph::getCallees(Vertex v) {
 	vector<Vertex> result;
 	for(int i = 0; i < edges.size(); i++) {
@@ -194,6 +198,43 @@ void Graph::writeGraphFile() {
 	// Write checksum to file
 	rewriteStackAnalysis(edges, verticesOnPath.size(), edgesOnPath.size());
 	return;
+}
+
+void Graph::writeStatsFile() {
+	ofstream fileout("stats.json");
+	if (!fileout) {
+		cout << "Error opening stats file" << endl;
+		return;
+	}
+
+	fileout << "{\n  \"vertices\": [";
+	// loop through vertices
+	bool isFirst = true;
+	for (Vertex &v : registeredVertices) {
+		if (isFirst) {
+			isFirst = false;
+		}
+		else {
+			fileout << ", ";
+		}
+		fileout << "\"" + v.str() + "\"";
+	}
+
+	fileout << "],\n  \"sensitiveNodes\": [";
+	// loop through sensitive nodes
+	isFirst = true;
+	for (Vertex &v : getSensitiveNodes()) {
+		if (isFirst) {
+			isFirst = false;
+		}
+		else {
+			fileout << ", ";
+		}
+		fileout << "\"" + v.str() + "\"";
+	}
+
+	fileout << "]\n}";
+
 }
 
 vector<Vertex> Graph::getPathsToSensitiveNodes() {
