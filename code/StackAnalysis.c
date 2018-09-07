@@ -146,6 +146,7 @@ void readEdges(char ***mapping, char ***adj_mat, int *vertices_count){
 	int line_count = 123;
 
 	char *cur_line = graph_text;
+	char *next_line = cur_line;
 
 	// alloc func buffer
 	char ** buffer = (char **)malloc(2 * line_count * sizeof(char *));
@@ -179,15 +180,25 @@ void readEdges(char ***mapping, char ***adj_mat, int *vertices_count){
 	if(DEBUG) printf("Allocated adj_mat\n");
 
 	int count = 0;
-	while(cur_line){
-		char *next_line = strchr(cur_line, '\n');
+	//fprintf(stderr, "start: [%s]\n", cur_line);
+	while(next_line && *next_line){
+		cur_line = next_line;
+		next_line = strchr(next_line, '\n');
+		//fprintf(stderr, "cur_before[%s]\n", cur_line);
+		//fprintf(stderr, "-[%s]-\n", next_line);
 
-		if (next_line) *next_line = '\0';
-		else break;
+		if (next_line) {
+			*next_line = '\0';
+			next_line++;
+		}
+		//else break;
+		//fprintf(stderr, "cur_after[%s]\n", cur_line);
 
 		toks = strtok(cur_line, " ");
+		//toks[strcspn(toks, "\n")] = 0;
 
 		while(toks != NULL){
+			//fprintf(stderr, "\t[%s]\n", toks);
 			buffer[count++] = toks;
 
 			int found = binarySearch(mapping, toks, next-1);
@@ -202,6 +213,7 @@ void readEdges(char ***mapping, char ***adj_mat, int *vertices_count){
 			//	toks[strcspn(toks, "\n")] = 0;
 		}//while(toks != NULL);
 	}
+	//fprintf(stderr, "Post\n");
 
 	if(DEBUG) {
 		for (int i = 0 ; i < *vertices_count ; i++) {
