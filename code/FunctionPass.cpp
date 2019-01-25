@@ -16,6 +16,7 @@
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/IR/TypeBuilder.h"
+#include "llvm/IR/DebugLoc.h"
 
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/LLVMContext.h"
@@ -27,8 +28,16 @@
 using namespace llvm;
 using namespace std;
 
-static cl::opt<string> InputSensitiveFcts("i",
+static cl::opt<string> InputSensitiveFcts("c",
 	cl::desc("Specify filename containing the list of sensitive functions"),
+	cl::value_desc("filename"));
+
+static cl::opt<string> InputStackAnalysisFile("i",
+	cl::desc("Specify filename of stack analysis template."),
+	cl::value_desc("filename"));
+
+static cl::opt<string> OutputStackAnalysisFile("n",
+	cl::desc("Specify filename to write the updated stack analysis to."),
 	cl::value_desc("filename"));
 
 static cl::opt<bool> OutputStats("s",
@@ -71,7 +80,7 @@ namespace{
 		if (OutputStats) {
 			graph.writeStatsFile();
 		}
-		graph.writeGraphFile();
+		graph.writeGraphFile(InputStackAnalysisFile.c_str(), OutputStackAnalysisFile.c_str());
 		return false;
 	}
 
@@ -93,7 +102,9 @@ namespace{
 					builder.SetInsertPoint(&block, builder.GetInsertPoint());
 
 					Value *strPtr = builder.CreateGlobalStringPtr(funcName.c_str());
-					builder.CreateCall(registerFunction, strPtr);
+					//builder.SetCurrentDebugLocation(instruction.getDebugLoc());
+					CallInst *callInst = builder.CreateCall(registerFunction, strPtr);//, instruction.getDebugLoc().getAsMDNode());
+					//callInst->setDebugLoc(instruction.getDebugLoc());
 					modified = true;
 					first_instr = false;
 

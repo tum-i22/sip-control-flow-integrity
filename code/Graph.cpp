@@ -117,35 +117,36 @@ vector<Vertex> Graph::getSensitiveNodes() {
 	return result;
 }
 
-void rewriteStackAnalysis(string edges, int numVertices, int numEdges) {
-	ifstream filein("../code/StackAnalysis.c"); //File to read from
-	ofstream fileout("../code/NewStackAnalysis.c"); //Temporary file
+void rewriteStackAnalysis(string inputFile, string outputFile, string edges, int numVertices, int numEdges) {
+	ifstream filein(inputFile); //File to read from
+	ofstream fileout(outputFile); //Temporary file
 	if(!filein || !fileout){
 		cout << "Error opening files!" << endl;
 		return;
 	}
 
-	string graphTextReplace = "char graph_text[] = \"123\"";
-	string vertReplace = "*vertices_count = 123";
-	string lineReplace = "int line_count = 123";
+	string graphTextReplace = "GRAPH_TEXT_PLACEHOLDER";
+	string vertReplace = "VERT_COUNT_PLACEHOLDER";
+	string lineReplace = "LINE_COUNT_PLACEHOLDER";
 
 	string strTemp;
+	size_t findPos;
 	while(getline(filein, strTemp)) {
-		if(strTemp.find(graphTextReplace) != string::npos) {
-			strTemp = "\tchar graph_text[] = \"" + edges + "\";";
+		if((findPos = strTemp.find(graphTextReplace)) != string::npos) {
+			strTemp.replace(findPos, graphTextReplace.length(), "\"" + edges + "\"");
 		}
-		else if(strTemp.find(vertReplace) != string::npos) {
-			strTemp = "\t*vertices_count = " + to_string(numVertices) + ";";
+		else if((findPos = strTemp.find(vertReplace)) != string::npos) {
+			strTemp.replace(findPos, graphTextReplace.length(), to_string(numVertices));
 		}
-		else if(strTemp.find(lineReplace) != string::npos) {
-			strTemp = "\tint line_count = " + to_string(numEdges) + ";";
+		else if((findPos = strTemp.find(lineReplace)) != string::npos) {
+			strTemp.replace(findPos, graphTextReplace.length(), to_string(numEdges));
 		}
 		strTemp += "\n";
 		fileout << strTemp;
 	}
 }
 
-void Graph::writeGraphFile() {
+void Graph::writeGraphFile(string inputFile, string outputFile) {
 	vector<Vertex> paths = getPathsToSensitiveNodes();
 
 	vector<Vertex> verticesOnPath;
@@ -172,31 +173,8 @@ void Graph::writeGraphFile() {
 	}
 	string edges = ss.str();
 
-	/*unsigned char c[SHA256_DIGEST_LENGTH];
-	FILE *inFile = fopen ("graph.txt", "rb");
-	if(inFile == NULL) {
-		printf("graph.txt can't be opened.\n");
-		return;
-	}
-	SHA256_CTX sha256;
-	int bytes;
-	unsigned char data[1024];
-	SHA256_Init(&sha256);
-	while((bytes = fread(data, 1, 1024, inFile)) != 0)
-		SHA256_Update(&sha256, data, bytes);
-	fclose (inFile);
-
-	SHA256_Final(c, &sha256);
-
-	stringstream ss;
-	for(int i = 0; i < SHA256_DIGEST_LENGTH; i++)
-		ss << setfill('0') << setw(2) << std::hex << (int)c[i];
-
-	string checksum = ss.str();
-	*/
-
 	// Write checksum to file
-	rewriteStackAnalysis(edges, verticesOnPath.size(), edgesOnPath.size());
+	rewriteStackAnalysis(inputFile, outputFile, edges, verticesOnPath.size(), edgesOnPath.size());
 	return;
 }
 

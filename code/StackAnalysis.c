@@ -18,15 +18,9 @@ char **mapping;
 char **adj_mat;
 int vertices_count;
 
-void registerFunction(char functionName[]);
-void deregisterFunction(char functionName[]);
-
 void registerFunction(char functionName[]) {
 	node_t *next = stack;
 	while(next != NULL) {
-		// if(next->value == functionName) {
-		// 	return;
-		// }
 		next = next->next;
 	}
 
@@ -70,36 +64,6 @@ void deregisterFunction(char functionName[]) {
 	}
 }
 
-/*int verifyChecksum(){
-	if(DEBUG) printf("Verifying checksum...\n");
-	FILE *fp = fopen("graph.txt", "rb");
-	if (fp == NULL){
-		fprintf(stderr, "Could not open 'graph.txt'\n");
-		exit(1);
-	}
-	unsigned char hash[SHA256_DIGEST_LENGTH];
-	SHA256_CTX sha;
-	SHA256_Init(&sha);
-
-	char buf[1024];
-	int r;
-
-	while((r = fread(buf, 1, sizeof(buf), fp)) > 0){
-		SHA256_Update(&sha, buf, r);
-	}
-	SHA256_Final(hash, &sha);
-	if(DEBUG) printf("Building checksum...\n");
-	char actualHash[65];
-	for(int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
-        sprintf(actualHash + (i * 2), "%02x", hash[i]);
-    }
-    actualHash[64] = 0;
-
-	char *expectedHash = "123";
-	if(DEBUG) printf("Returning...\n");
-	return (strcmp(expectedHash, actualHash) == 0);
-}*/
-
 /**
  * Binary search: O(log(n)), only works for sorted list!
  */
@@ -141,9 +105,9 @@ void readEdges(char ***mapping, char ***adj_mat, int *vertices_count){
 	char * toks;
 	int next = 0;
 
-	char graph_text[] = "123";
-	*vertices_count = 123;
-	int line_count = 123;
+	char graph_text[] = GRAPH_TEXT_PLACEHOLDER;
+	*vertices_count = VERT_COUNT_PLACEHOLDER;
+	int line_count = LINE_COUNT_PLACEHOLDER;
 
 	char *cur_line = graph_text;
 	char *next_line = cur_line;
@@ -180,25 +144,18 @@ void readEdges(char ***mapping, char ***adj_mat, int *vertices_count){
 	if(DEBUG) printf("Allocated adj_mat\n");
 
 	int count = 0;
-	//fprintf(stderr, "start: [%s]\n", cur_line);
 	while(next_line && *next_line){
 		cur_line = next_line;
 		next_line = strchr(next_line, '\n');
-		//fprintf(stderr, "cur_before[%s]\n", cur_line);
-		//fprintf(stderr, "-[%s]-\n", next_line);
 
 		if (next_line) {
 			*next_line = '\0';
 			next_line++;
 		}
-		//else break;
-		//fprintf(stderr, "cur_after[%s]\n", cur_line);
 
 		toks = strtok(cur_line, " ");
-		//toks[strcspn(toks, "\n")] = 0;
 
 		while(toks != NULL){
-			//fprintf(stderr, "\t[%s]\n", toks);
 			buffer[count++] = toks;
 
 			int found = binarySearch(mapping, toks, next-1);
@@ -209,11 +166,8 @@ void readEdges(char ***mapping, char ***adj_mat, int *vertices_count){
 				qsort(*mapping, next, sizeof(char *), stringcmp);
 			}
 			toks = strtok(NULL, " ");
-			//if(toks != NULL)
-			//	toks[strcspn(toks, "\n")] = 0;
-		}//while(toks != NULL);
+		}
 	}
-	//fprintf(stderr, "Post\n");
 
 	if(DEBUG) {
 		for (int i = 0 ; i < *vertices_count ; i++) {
@@ -283,11 +237,6 @@ void verify(char ***mapping, char ***adj_mat, int vertices_count) {
 
 void verifyStack() {
 	if(!built_matrix){
-		/*if (!verifyChecksum()){
-			printf("Wrong hash\n");
-			response();
-			return;
-		}*/
 		readEdges(&mapping, &adj_mat, &vertices_count);
 		built_matrix = 1;
 		if(DEBUG) {

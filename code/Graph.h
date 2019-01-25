@@ -69,7 +69,7 @@ public:
 
 	vector<Edge> getEdges();
 
-	void writeGraphFile();
+	void writeGraphFile(string inputFile, string outputFile);
 
 	void writeStatsFile();
 
