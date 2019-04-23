@@ -15,7 +15,6 @@
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/Support/raw_ostream.h"
-#include "llvm/IR/TypeBuilder.h"
 #include "llvm/IR/DebugLoc.h"
 
 #include "llvm/IR/DerivedTypes.h"
@@ -94,7 +93,13 @@ namespace{
 				if(first_instr) {
 					LLVMContext& Ctx = function.getContext();
 
-					FunctionType *registerType = TypeBuilder<void(char *), false>::get(Ctx);
+					FunctionType *registerType = FunctionType::get(
+							/*retType=*/Type::getVoidTy(Ctx),
+							/*argTypes=*/ {
+								Type::getInt8PtrTy(Ctx)
+							},
+							/*varArg=*/false
+					);
 					Function* registerFunction = cast<Function>(function.getParent()->
 						getOrInsertFunction("registerFunction", registerType));
 
@@ -112,7 +117,11 @@ namespace{
 
 					// Function is in the sensitive list
 					if(find(sensitiveList.begin(), sensitiveList.end(), funcName) != sensitiveList.end()) {
-						FunctionType *verifyType = TypeBuilder<void(), false>::get(Ctx);
+						FunctionType *verifyType = FunctionType::get(
+								/*retType=*/Type::getVoidTy(Ctx),
+								/*argTypes=*/{},
+								/*varArg=*/false
+						);
 						Function *verifyFunction = cast<Function>(function.getParent()->
 							getOrInsertFunction("verifyStack", verifyType));
 
@@ -137,7 +146,13 @@ namespace{
 				if(auto *callInstruction = dyn_cast<ReturnInst>(&instruction)) {
 					LLVMContext& Ctx = function.getContext();
 
-					FunctionType *registerType = TypeBuilder<void(char *), false>::get(Ctx);
+					FunctionType *registerType = FunctionType::get(
+							/*retType=*/Type::getVoidTy(Ctx),
+							/*argTypes=*/ {
+								Type::getInt8PtrTy(Ctx)
+							},
+							/*varArg=*/false
+					);
 					Function* deregisterFunction = cast<Function>(function.getParent()->
 					getOrInsertFunction("deregisterFunction", registerType));
 
