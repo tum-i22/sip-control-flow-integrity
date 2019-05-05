@@ -161,7 +161,8 @@ void readEdges(char ***mapping, char ***adj_mat, int *vertices_count){
 			int found = binarySearch(mapping, toks, next-1);
 			if (found == -1){
 				int len = strlen(toks);
-				(*mapping)[next] = (char *) malloc(len * sizeof(char));
+				(*mapping)[next] = (char *) malloc(1 + len * sizeof(char));
+				(*mapping)[next][len * sizeof(char)] = '\0';
 				strncpy((*mapping)[next++], toks, len);
 				qsort(*mapping, next, sizeof(char *), stringcmp);
 			}
